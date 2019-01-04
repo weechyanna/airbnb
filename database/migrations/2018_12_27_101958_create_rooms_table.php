@@ -20,6 +20,10 @@ class CreateRoomsTable extends Migration
             $table->float('price');
             $table->string('type');
             $table->string('location');
+            $table->integer('user_id');
+            $table->string('filename')->nullable();
+            $table->string('mime')->nullable();
+            $table->string('original_filename')->nullable();
             $table->timestamps();
         });
     }
