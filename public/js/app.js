@@ -1805,11 +1805,32 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["isLoggedIn", "userId", "isAdmin"],
   data: function data() {
     return {
       rooms: [],
       selectedCategory: 'All',
+      selectedLocation: '',
       search: '',
       room: {
         id: '',
@@ -1817,7 +1838,8 @@ __webpack_require__.r(__webpack_exports__);
         description: '',
         price: '',
         type: '',
-        location: ''
+        location: '',
+        user_id: ''
       }
     };
   },
@@ -1847,17 +1869,38 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error);
       });
     },
-    searchTitle: function searchTitle() {
+    onSelectChanged: function onSelectChanged() {
       var _this3 = this;
 
-      var title = this.search;
-      var type = this.selectedCategory;
-      console.log(title);
-      axios.get('/rooms?title=' + title + "&type=" + type).then(function (_ref3) {
+      var location = this.selectedLocation;
+      axios.get('/rooms?location=' + location).then(function (_ref3) {
         var data = _ref3.data;
         _this3.rooms = data;
       }, function (error) {
         console.log(error);
+      });
+    },
+    searchTitle: function searchTitle() {
+      var _this4 = this;
+
+      var title = this.search;
+      var type = this.selectedCategory;
+      var location = this.selectedLocation;
+      console.log(title);
+      axios.get('/rooms?title=' + title + "&type=" + type + "&location=" + location).then(function (_ref4) {
+        var data = _ref4.data;
+        _this4.rooms = data;
+      }, function (error) {
+        console.log(error);
+      });
+    },
+    deleteRoom: function deleteRoom(id) {
+      var _this5 = this;
+
+      axios.delete('/rooms/' + id).then(function (response) {
+        _this5.getRooms();
+      }).catch(function (err) {
+        return console.error(err);
       });
     }
   }
@@ -36713,6 +36756,21 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
+    _c("h5", { staticClass: "logged" }, [_vm._v(_vm._s(_vm.isLoggedIn))]),
+    _vm._v(" "),
+    _c("h5", { staticClass: "admin" }, [_vm._v(_vm._s(_vm.isAdmin))]),
+    _vm._v(" "),
+    _vm.isAdmin === "admin"
+      ? _c(
+          "a",
+          {
+            staticClass: "btn btn-primary",
+            attrs: { href: "/admin", role: "button" }
+          },
+          [_vm._v("Admin")]
+        )
+      : _vm._e(),
+    _vm._v(" "),
     _c(
       "form",
       {
@@ -36759,7 +36817,7 @@ var render = function() {
       [_vm._v("Type")]
     ),
     _vm._v(" "),
-    _c("div", { staticClass: "filter" }, [
+    _c("div", { staticClass: "filterType" }, [
       _c("label", [
         _c("input", {
           directives: [
@@ -36833,6 +36891,51 @@ var render = function() {
       ])
     ]),
     _vm._v(" "),
+    _c("div", { staticClass: "form-group" }, [
+      _c("label", { attrs: { for: "location" } }, [_vm._v("Location")]),
+      _vm._v(" "),
+      _c(
+        "select",
+        {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.selectedLocation,
+              expression: "selectedLocation"
+            }
+          ],
+          staticClass: "form-control",
+          attrs: { id: "location" },
+          on: {
+            change: [
+              function($event) {
+                var $$selectedVal = Array.prototype.filter
+                  .call($event.target.options, function(o) {
+                    return o.selected
+                  })
+                  .map(function(o) {
+                    var val = "_value" in o ? o._value : o.value
+                    return val
+                  })
+                _vm.selectedLocation = $event.target.multiple
+                  ? $$selectedVal
+                  : $$selectedVal[0]
+              },
+              _vm.onSelectChanged
+            ]
+          }
+        },
+        [
+          _c("option", [_vm._v("Seattle")]),
+          _vm._v(" "),
+          _c("option", [_vm._v("Los Angeles")]),
+          _vm._v(" "),
+          _c("option", [_vm._v("Ermelo")])
+        ]
+      )
+    ]),
+    _vm._v(" "),
     _c(
       "div",
       { staticClass: "row row-eq-height" },
@@ -36860,10 +36963,52 @@ var render = function() {
               _vm._v(" "),
               _c("li", { staticClass: "list-group-item" }, [
                 _vm._v("Location: " + _vm._s(room.location))
+              ]),
+              _vm._v(" "),
+              _c("li", { staticClass: "list-group-item" }, [
+                _vm._v("User: " + _vm._s(room.user_id))
+              ]),
+              _vm._v(" "),
+              _c("li", { staticClass: "list-group-item" }, [
+                _vm._v("Current User: " + _vm._s(_vm.userId))
+              ]),
+              _vm._v(" "),
+              _c("li", { staticClass: "list-group-item" }, [
+                _vm._v("User: " + _vm._s(room.name))
               ])
             ]),
             _vm._v(" "),
-            _vm._m(0, true)
+            _vm._m(0, true),
+            _vm._v(" "),
+            _vm.userId == room.user_id || _vm.isAdmin === "admin"
+              ? _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: {
+                      href: "/rooms/" + room.id + "/edit",
+                      role: "button"
+                    }
+                  },
+                  [_vm._v("Edit")]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.userId == room.user_id || _vm.isAdmin === "admin"
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-danger",
+                    attrs: { name: "delete" },
+                    on: {
+                      click: function($event) {
+                        _vm.deleteRoom(room.id)
+                      }
+                    }
+                  },
+                  [_vm._v("Delete")]
+                )
+              : _vm._e()
           ])
         ])
       }),

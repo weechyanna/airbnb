@@ -15,8 +15,6 @@ class RoomsController extends Controller{
    $this->roomsService = $roomService;
  }
 
-
-
   public function index(Request $request){
     if ($request->wantsJson()){
       // return a JSON response
@@ -25,6 +23,27 @@ class RoomsController extends Controller{
      // otherwise we will return the view
      return view('rooms.index');
   }
+
+  public function create(){
+    return view('rooms.create');
+  }
+
+  public function store(Request $request){
+    return $this->roomsService->store($request);
+  }
+
+  public function edit(Room $room){
+    return view('rooms.edit', ['room' => $room]);
+  }
+
+  public function update(Request $request, Room $room){
+    return $this->roomsService->update($request,$room);
+  }
+
+  public function destroy(Room $room){
+    return $this->roomsService->destroy($room);
+  }
+
 
 
 }
